@@ -1,0 +1,66 @@
+.root {
+  position: relative;
+  min-width: 0;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  color: #40594b;
+  font-size: 12px;
+}
+
+.trigger:hover,
+.trigger[aria-expanded="true"] {
+  background: #f0f5ee;
+}
+
+.trigger:focus-visible,
+.menu button:focus-visible {
+  outline: 2px solid #277765;
+  outline-offset: 2px;
+}
+
+.name {
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  width: 180px;
+  padding: 6px;
+  border: 1px solid #dfe8e0;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 10px 30px #19382a1a;
+}
+
+.menu button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
+  color: #40594b;
+  text-align: left;
+  font-size: 12px;
+}
+
+.menu button:hover {
+  background: #f0f5ee;
+}
+
+@media (max-width: 600px) {
+  .name { max-width: 76px; }
+  .trigger { gap: 5px; padding: 4px; }
+}
