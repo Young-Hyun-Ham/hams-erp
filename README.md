@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# HAMS WORKS · 사내 ERP
 
-## Getting Started
+IT 아웃소싱 기업의 직원·프리랜서 인사 정보, 출퇴근, 원격근무 상태, 급여·정산 초안을 관리하는 Next.js 서비스입니다.
 
-First, run the development server:
+## 실행
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+http://localhost:3000 에서 샘플 계정을 선택해 로그인합니다.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| 역할 | 이메일 | 기본 비밀번호 |
+| --- | --- | --- |
+| 관리자 | admin@hams.demo | hams1234! |
+| 직원 | member@hams.demo | hams1234! |
+| 프리랜서 | partner@hams.demo | hams1234! |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+최초 API 요청 시 샘플 구성원 6명과 테이블이 자동 생성됩니다. 출퇴근·원격 상태·정산 내역은 실제 조작 시 생성하며 가상의 근무 기록을 표시하지 않습니다.
 
-## Learn More
+## 기능
 
-To learn more about Next.js, take a look at the following resources:
+- **대시보드**: 전체 구성원, 오늘 근무 인원, 원격 활동 인원, 당월 정산 예정액을 조회합니다.
+- **인사 관리**: 관리자는 이름, 이메일, 소속, 직무, 계약 유형, 프로젝트, 입사·계약일, 월 기본급·계약금을 등록·수정하고 검색합니다. 등록은 로그인 계정 생성과 별개이며 샘플 로그인 계정 이메일은 변경할 수 없습니다.
+- **출퇴근**: 로그인한 본인이 사무실·원격 근무 장소를 선택해 출근하고 퇴근합니다. 한국 시간 기준 하루 한 번 출근하며 중복 요청을 DB 유일 제약으로 차단합니다. 이전 날짜의 진행 중인 근무가 있으면 먼저 퇴근해야 합니다. 조회 및 CSV 다운로드는 최근 500건에서 월별로 필터링합니다. 표시 시간은 휴게시간 차감 전 경과 시간입니다.
+- **원격근무**: 원격 출근 후 업무 내용과 명시적 동의를 받아 공유합니다. 20초 간격으로 연결 상태를 보내고 관리 화면은 15초마다 갱신합니다. 앱 내 클릭·키 입력의 발생 시각, 탭 표시 상태, 업무 내용만 기록합니다. 입력 내용·화면·카메라는 수집하지 않습니다. 5분간 활동이 없거나 탭을 숨기면 자리 비움, 90초간 연결되지 않으면 연결 끊김으로 표시됩니다. 실제 업무 수행 여부를 증명하지 않으며, 최신 공유 상태만 보관합니다. 공유 종료·퇴근·로그아웃 시 종료됩니다. 앱을 닫으면 연결 끊김으로 전환합니다.
+- **급여·정산**: 관리자가 월별 초안을 생성하고 수당·공제를 입력해 검토합니다. 재생성 시 기존 내역은 유지합니다. 등록 월 기본급·계약금을 기준으로 하며 세금·보험·입사 월 일할 계산은 포함하지 않습니다. 검토 완료는 실제 송금과 별개입니다.
+- **접근 제어**: 서버 API에서 관리자는 전체 데이터, 직원·프리랜서는 본인 데이터만 조회하도록 제한합니다. 인사·정산 수정은 관리자만 가능합니다. 세션 토큰은 HttpOnly 쿠키에, 토큰 해시는 DB에 저장하며 8시간 후 만료됩니다.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 데이터베이스 및 환경 변수
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+기본 DB는 `data/erp.db` SQLite 파일이며 Git에서 제외됩니다. Node.js와 쓰기 가능한 영속 디스크가 필요합니다. 임시 디스크를 사용하는 배포 환경에서는 원격 libSQL DB를 설정하세요.
 
-## Deploy on Vercel
+| 변수 | 설명 |
+| --- | --- |
+| ERP_DATABASE_URL | 선택. 기본 `file:data/erp.db`; 원격 libSQL URL 사용 가능 |
+| ERP_DATABASE_AUTH_TOKEN | 원격 DB 인증 토큰. 서버 전용 |
+| ERP_DEMO_PASSWORD | 샘플 계정 공통 비밀번호 변경. 기본 `hams1234!` |
+| ERP_ENABLE_DEMO_LOGIN | 프로덕션에서 샘플 로그인을 허용하려면 `true`. 기본 차단 |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+이 버전은 샘플 인증을 제공하는 개발용 기반입니다. 실제 사내 운영 전 기존 SSO 및 사용자 프로비저닝을 연결하고 실제 급여 산식과 회사 근태 정책을 적용해야 합니다. 원격근무 관제는 이 웹 앱의 상태 공유 범위입니다.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 검증
+
+```bash
+pnpm exec tsc --noEmit
+pnpm build
+node --test tests/erp.test.mjs
+```
+
+통합 테스트는 별도 임시 DB와 로컬 프로덕션 서버를 생성하고 종료 후 정리합니다. 인증·권한 분리, 구성원 등록·수정, 동시 중복 출근 방지, 원격 공유 동의·종료, 정산 저장·재생성, 서버 재시작 후 데이터 유지, 프로덕션 데모 로그인 차단, 로그아웃 무효화를 검증합니다.
